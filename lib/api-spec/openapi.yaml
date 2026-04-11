@@ -3,13 +3,21 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Braids Center Booking System API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: designs
+    description: Braid design operations
+  - name: availability
+    description: Availability time range operations
+  - name: bookings
+    description: Booking operations
+  - name: admin
+    description: Admin operations
 paths:
   /healthz:
     get:
@@ -24,6 +32,380 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /designs:
+    get:
+      operationId: listDesigns
+      tags: [designs]
+      summary: List all braid designs
+      responses:
+        "200":
+          description: List of designs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Design"
+    post:
+      operationId: createDesign
+      tags: [designs]
+      summary: Create a new braid design (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDesignBody"
+      responses:
+        "201":
+          description: Design created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Design"
+
+  /designs/{id}:
+    get:
+      operationId: getDesign
+      tags: [designs]
+      summary: Get a braid design by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Design found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Design"
+        "404":
+          description: Design not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateDesign
+      tags: [designs]
+      summary: Update a braid design (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDesignBody"
+      responses:
+        "200":
+          description: Design updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Design"
+        "404":
+          description: Design not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteDesign
+      tags: [designs]
+      summary: Delete a braid design (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Design deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "404":
+          description: Design not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /availability:
+    get:
+      operationId: listAvailability
+      tags: [availability]
+      summary: List all availability ranges
+      parameters:
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            description: Filter by specific date (YYYY-MM-DD)
+      responses:
+        "200":
+          description: List of availability ranges
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AvailabilityRange"
+    post:
+      operationId: createAvailability
+      tags: [availability]
+      summary: Create an availability range (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAvailabilityBody"
+      responses:
+        "201":
+          description: Availability range created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AvailabilityRange"
+
+  /availability/{id}:
+    put:
+      operationId: updateAvailability
+      tags: [availability]
+      summary: Update an availability range (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAvailabilityBody"
+      responses:
+        "200":
+          description: Availability updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AvailabilityRange"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteAvailability
+      tags: [availability]
+      summary: Delete an availability range (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /availability/slots:
+    get:
+      operationId: getAvailableSlots
+      tags: [availability]
+      summary: Get valid booking start times for a design on a date
+      parameters:
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+            description: Date in YYYY-MM-DD format
+        - name: designId
+          in: query
+          required: true
+          schema:
+            type: integer
+            description: ID of the selected design
+      responses:
+        "200":
+          description: List of available time slots
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AvailableSlotsResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /bookings:
+    get:
+      operationId: listBookings
+      tags: [bookings]
+      summary: List all bookings (admin) or by date/design
+      parameters:
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            description: Filter by date (YYYY-MM-DD)
+        - name: designId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of bookings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Booking"
+    post:
+      operationId: createBooking
+      tags: [bookings]
+      summary: Create a booking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBookingBody"
+      responses:
+        "201":
+          description: Booking created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Booking"
+        "409":
+          description: Time slot conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /bookings/{id}:
+    get:
+      operationId: getBooking
+      tags: [bookings]
+      summary: Get a booking by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Booking found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Booking"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteBooking
+      tags: [bookings]
+      summary: Cancel/delete a booking (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Booking cancelled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/summary:
+    get:
+      operationId: getAdminSummary
+      tags: [admin]
+      summary: Get admin dashboard summary stats
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminSummary"
+
+  /admin/upcoming:
+    get:
+      operationId: getUpcomingBookings
+      tags: [admin]
+      summary: Get upcoming bookings sorted by date/time
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Upcoming bookings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Booking"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +416,247 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+
+    Design:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        price:
+          type: number
+          description: Price in dollars
+        durationHours:
+          type: number
+          description: Duration of the style in hours
+        imageUrl:
+          type: string
+          nullable: true
+          description: URL of the design image
+        description:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - price
+        - durationHours
+        - createdAt
+
+    CreateDesignBody:
+      type: object
+      properties:
+        name:
+          type: string
+        price:
+          type: number
+        durationHours:
+          type: number
+        imageUrl:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+      required:
+        - name
+        - price
+        - durationHours
+
+    AvailabilityRange:
+      type: object
+      properties:
+        id:
+          type: integer
+        date:
+          type: string
+          description: Date in YYYY-MM-DD format
+        startTime:
+          type: string
+          description: Start time in HH:MM format (24h)
+        endTime:
+          type: string
+          description: End time in HH:MM format (24h)
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - date
+        - startTime
+        - endTime
+        - createdAt
+
+    CreateAvailabilityBody:
+      type: object
+      properties:
+        date:
+          type: string
+          description: Date in YYYY-MM-DD format
+        startTime:
+          type: string
+          description: Start time in HH:MM (24h)
+        endTime:
+          type: string
+          description: End time in HH:MM (24h)
+      required:
+        - date
+        - startTime
+        - endTime
+
+    TimeSlot:
+      type: object
+      properties:
+        startTime:
+          type: string
+          description: Start time in HH:MM (24h)
+        endTime:
+          type: string
+          description: End time in HH:MM (24h)
+      required:
+        - startTime
+        - endTime
+
+    AvailableSlotsResponse:
+      type: object
+      properties:
+        date:
+          type: string
+        designId:
+          type: integer
+        designName:
+          type: string
+        durationHours:
+          type: number
+        slots:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimeSlot"
+      required:
+        - date
+        - designId
+        - designName
+        - durationHours
+        - slots
+
+    Booking:
+      type: object
+      properties:
+        id:
+          type: integer
+        customerName:
+          type: string
+        customerPhone:
+          type: string
+          nullable: true
+        customerEmail:
+          type: string
+          nullable: true
+        designId:
+          type: integer
+        designName:
+          type: string
+        date:
+          type: string
+          description: Booking date YYYY-MM-DD
+        startTime:
+          type: string
+          description: Booking start HH:MM (24h)
+        endTime:
+          type: string
+          description: Booking end HH:MM (24h)
+        notes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - customerName
+        - designId
+        - designName
+        - date
+        - startTime
+        - endTime
+        - createdAt
+
+    CreateBookingBody:
+      type: object
+      properties:
+        customerName:
+          type: string
+        customerPhone:
+          type: string
+          nullable: true
+        customerEmail:
+          type: string
+          nullable: true
+        designId:
+          type: integer
+        date:
+          type: string
+          description: Date in YYYY-MM-DD format
+        startTime:
+          type: string
+          description: Start time in HH:MM (24h)
+        notes:
+          type: string
+          nullable: true
+      required:
+        - customerName
+        - designId
+        - date
+        - startTime
+
+    AdminSummary:
+      type: object
+      properties:
+        totalBookings:
+          type: integer
+        totalDesigns:
+          type: integer
+        upcomingBookings:
+          type: integer
+        todayBookings:
+          type: integer
+        popularDesigns:
+          type: array
+          items:
+            type: object
+            properties:
+              designId:
+                type: integer
+              designName:
+                type: string
+              bookingCount:
+                type: integer
+            required:
+              - designId
+              - designName
+              - bookingCount
+      required:
+        - totalBookings
+        - totalDesigns
+        - upcomingBookings
+        - todayBookings
+        - popularDesigns

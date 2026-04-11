@@ -1,0 +1,90 @@
+I want to build a full-stack website for a braids center booking system.
+
+The website should allow customers to book appointments based on predefined available time ranges that I (the admin) set manually.
+
+Here are the requirements:
+
+1. Designs Section:
+
+* The homepage should display a list of braid designs.
+* Each design must include:
+
+  * Image (I will upload it)
+  * Name
+  * Price
+  * Duration (in hours)
+* Users must select a design first.
+
+2. Availability System:
+
+* I (admin) will manually define available time ranges for each day.
+  Example: Monday from 4 PM to 8 PM.
+* These are NOT fixed slots — they are continuous time ranges.
+
+3. Booking Logic:
+
+* When a user selects a design, the system should:
+
+  * Use the design duration to calculate valid start times within the available range.
+  * Example:
+    If available time is 4 PM → 8 PM
+    and design duration is 2 hours
+    then available booking options are:
+    4–6, 5–7, 6–8
+
+4. Prevent Overlapping:
+
+* Once a booking is made, that time should no longer be available.
+* The system must prevent overlapping bookings using this logic:
+  A booking is invalid if:
+  (new_start < existing_end) AND (new_end > existing_start)
+
+5. Dynamic Availability Update:
+
+* After a booking is made, the system should update the available time ranges.
+* Example:
+  If original range is 4–8
+  and someone books 4–6
+  then remaining availability becomes 6–8
+
+6. Smart Filtering:
+
+* If a design duration does not fit into remaining available time, it should NOT be shown as an option.
+  Example:
+  If remaining time is 6–8 (2 hours)
+  and design duration is 3 hours
+  → do not show this time to the user at all
+
+7. Booking Flow:
+
+* User selects:
+
+  1. Design
+  2. Date
+  3. Available time (only valid ones shown)
+* Then confirms booking.
+
+8. Admin Features:
+
+* Add/edit/delete designs (with image, price, duration)
+* Set available time ranges per day
+* View bookings
+
+9. Tech Stack:
+
+* Use Node.js with Express for backend
+* Use MongoDB for database
+* Simple frontend (HTML/CSS/JS or React if possible)
+
+10. Bonus (if possible):
+
+* Clean UI for mobile
+* Prevent double booking
+* Show success message after booking
+
+I will provide:
+
+* Images of designs
+* Price and duration for each design
+
+Build this step by step with clean code and clear structure.

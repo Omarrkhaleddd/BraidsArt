@@ -1,0 +1,20 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "PKbXKrxL0mmN-IrqGf821"
+uri = "file://artifacts/braids-booking/public/braids-1.png"
+type = "image"
+title = "Knotless box braids"
+
+[[generated]]
+id = "ZHbG3lopBoUESb49tLjnh"
+uri = "file://artifacts/braids-booking/public/braids-2.png"
+type = "image"
+title = "Fulani braids"
+
+[[generated]]
+id = "NY8tiVIR5K8Ior-zUxcg3"
+uri = "file://artifacts/braids-booking/public/hero.png"
+type = "image"
+title = "Hero background"
