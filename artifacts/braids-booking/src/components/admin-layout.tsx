@@ -10,9 +10,15 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { clearAdminToken } from "@/lib/admin-auth";
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+
+  const handleLogout = () => {
+    clearAdminToken();
+    setLocation("/admin/login");
+  };
 
   const navItems = [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -35,7 +41,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           const Icon = item.icon;
           return (
             <Link key={item.href} href={item.href}>
-              <div className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors cursor-pointer \${
+              <div className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                 isActive 
                   ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-sm' 
                   : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
@@ -47,13 +53,20 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           );
         })}
       </nav>
-      <div className="p-4 border-t border-sidebar-border">
+      <div className="p-4 border-t border-sidebar-border space-y-1">
         <Link href="/">
           <div className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors cursor-pointer">
-            <LogOut className="h-5 w-5" />
+            <Sparkles className="h-5 w-5" />
             Back to Site
           </div>
         </Link>
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-destructive/80 hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer"
+        >
+          <LogOut className="h-5 w-5" />
+          Sign Out
+        </button>
       </div>
     </div>
   );

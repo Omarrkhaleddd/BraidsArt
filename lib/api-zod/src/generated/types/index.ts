@@ -23,3 +23,5 @@ export * from "./listAvailabilityParams";
 export * from "./listBookingsParams";
 export * from "./messageResponse";
 export * from "./timeSlot";
+export * from "./uploadUrlRequest";
+export * from "./uploadUrlResponse";

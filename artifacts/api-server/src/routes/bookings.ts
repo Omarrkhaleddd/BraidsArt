@@ -8,6 +8,7 @@ import {
   GetBookingParams,
   DeleteBookingParams,
 } from "@workspace/api-zod";
+import { sendBookingNotification } from "../lib/mailer";
 
 const router = Router();
 
@@ -99,6 +100,17 @@ router.post("/", async (req, res) => {
       notes: notes ?? null,
     })
     .returning();
+
+  sendBookingNotification({
+    customerName,
+    customerPhone,
+    customerEmail,
+    designName: design.name,
+    date,
+    startTime,
+    endTime,
+    notes,
+  }).catch(() => {});
 
   res.status(201).json({
     id: booking.id,
