@@ -1,9 +1,8 @@
 import { Navbar, Footer } from "@/components/layout";
 import { Link } from "wouter";
 import { useListDesigns } from "@workspace/api-client-react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, DollarSign, ArrowRight } from "lucide-react";
+import { ArrowRight, Scissors } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Home() {
@@ -13,103 +12,95 @@ export default function Home() {
     <div className="flex min-h-[100dvh] flex-col">
       <Navbar />
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-muted relative overflow-hidden">
+        {/* Hero */}
+        <section className="w-full py-16 md:py-28 lg:py-40 bg-muted relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('/hero.png')] bg-cover bg-center opacity-40 mix-blend-multiply" />
           <div className="container px-4 md:px-6 relative z-10 mx-auto">
-            <div className="flex flex-col items-center space-y-4 text-center">
-              <div className="space-y-2 max-w-[800px]">
-                <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl/none font-serif text-foreground">
-                  Your Crown, <span className="text-primary italic">Crafted</span>
-                </h1>
-                <p className="mx-auto max-w-[700px] text-foreground/80 md:text-xl lg:text-2xl mt-6 font-sans">
-                  A premium braiding experience. We celebrate the artistry of Black hair culture with warmth, precision, and joy.
-                </p>
-              </div>
-              <div className="space-x-4 mt-8">
-                <Link href="/book">
-                  <Button size="lg" className="h-12 px-8 text-lg bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                    Book an Appointment <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-              </div>
+            <div className="flex flex-col items-center space-y-6 text-center">
+              <h1 className="text-5xl font-bold tracking-tighter sm:text-6xl md:text-7xl lg:text-8xl font-serif text-foreground leading-none">
+                Your Crown,{" "}
+                <span className="text-primary italic">Crafted</span>
+              </h1>
+              <p className="mx-auto max-w-[600px] text-foreground/70 md:text-xl lg:text-2xl font-sans">
+                A premium braiding experience rooted in artistry and culture.
+              </p>
+              <Link href="/book">
+                <Button size="lg" className="h-13 px-10 text-lg bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 mt-2">
+                  Book an Appointment <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
 
-        {/* Gallery Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-background">
+        {/* Gallery */}
+        <section className="w-full py-16 md:py-28 bg-background">
           <div className="container px-4 md:px-6 mx-auto">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl font-serif">Signature Styles</h2>
-                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  Explore our curated collection of beautiful, protective styles.
-                </p>
-              </div>
+            <div className="text-center mb-14">
+              <h2 className="text-4xl font-bold tracking-tighter sm:text-5xl font-serif mb-3">
+                Signature Styles
+              </h2>
+              <p className="text-muted-foreground text-lg max-w-xl mx-auto">
+                A curated collection of our most loved protective styles.
+              </p>
             </div>
 
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {[1, 2, 3, 4, 5, 6].map(i => (
-                  <Card key={i} className="overflow-hidden border-none shadow-md">
-                    <Skeleton className="w-full h-[300px]" />
-                    <CardHeader>
-                      <Skeleton className="h-6 w-2/3" />
-                    </CardHeader>
-                    <CardContent>
-                      <Skeleton className="h-4 w-full mb-2" />
-                      <Skeleton className="h-4 w-4/5" />
-                    </CardContent>
-                  </Card>
+              <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="break-inside-avoid">
+                    <Skeleton className={`w-full rounded-2xl ${i % 3 === 0 ? "h-[400px]" : i % 3 === 1 ? "h-[280px]" : "h-[340px]"}`} />
+                  </div>
                 ))}
               </div>
             ) : designs && designs.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {designs.map(design => (
-                  <Card key={design.id} className="overflow-hidden border-border shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col h-full bg-card">
-                    <div className="relative aspect-[3/4] overflow-hidden bg-muted">
+              <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">
+                {designs.map((design, i) => (
+                  <Link key={design.id} href={`/book?designId=${design.id}`} className="block break-inside-avoid group">
+                    <div className="relative rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300">
                       {design.imageUrl ? (
-                        <img 
-                          src={design.imageUrl} 
+                        <img
+                          src={design.imageUrl}
                           alt={design.name}
-                          className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                          className="w-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                       ) : (
-                        <div className="absolute inset-0 flex items-center justify-center bg-secondary/30 p-6 text-center">
-                          <span className="font-serif text-2xl text-primary/60 font-medium italic">{design.name}</span>
+                        <div
+                          className="w-full flex items-center justify-center bg-secondary/40"
+                          style={{ height: `${280 + (i % 3) * 80}px` }}
+                        >
+                          <Scissors className="h-10 w-10 text-primary/30" />
                         </div>
                       )}
-                      <div className="absolute top-4 right-4 bg-background/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-semibold text-foreground shadow-sm flex items-center">
-                        <DollarSign className="h-3 w-3 mr-1" />
-                        {design.price}
+                      {/* Hover overlay with name */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-5">
+                        <div>
+                          <p className="text-white font-serif text-xl font-semibold leading-tight">{design.name}</p>
+                          <p className="text-white/70 text-sm mt-1">Tap to book →</p>
+                        </div>
+                      </div>
+                      {/* Always-visible name bar at bottom */}
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-4 py-3 group-hover:opacity-0 transition-opacity duration-300">
+                        <p className="text-white font-serif font-medium text-base leading-snug">{design.name}</p>
                       </div>
                     </div>
-                    <CardHeader className="flex-none">
-                      <CardTitle className="font-serif text-2xl group-hover:text-primary transition-colors">{design.name}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="grow flex flex-col justify-between">
-                      <p className="text-muted-foreground line-clamp-3 mb-4">
-                        {design.description || "A beautiful, carefully crafted protective style."}
-                      </p>
-                      <div className="flex items-center text-sm font-medium text-foreground/80 bg-muted/50 w-fit px-3 py-1.5 rounded-md">
-                        <Clock className="h-4 w-4 mr-2 text-primary" />
-                        {design.durationHours} hours
-                      </div>
-                    </CardContent>
-                    <CardFooter className="pt-4 border-t border-border/50">
-                      <Link href={`/book?designId=${design.id}`} className="w-full">
-                        <Button className="w-full rounded-full" variant="outline">
-                          Select Style
-                        </Button>
-                      </Link>
-                    </CardFooter>
-                  </Card>
+                  </Link>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-20 bg-muted rounded-xl">
-                <h3 className="text-xl font-medium text-muted-foreground">No designs available yet.</h3>
+              <div className="text-center py-24 bg-muted/40 rounded-2xl">
+                <Scissors className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-40" />
+                <h3 className="text-xl font-medium text-muted-foreground">No styles available yet.</h3>
+              </div>
+            )}
+
+            {designs && designs.length > 0 && (
+              <div className="text-center mt-14">
+                <Link href="/book">
+                  <Button size="lg" className="rounded-full px-10 h-12 text-base">
+                    Book Your Style <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
               </div>
             )}
           </div>

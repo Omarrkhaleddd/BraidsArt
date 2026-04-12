@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { availabilityTable, bookingsTable, designsTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, ne } from "drizzle-orm";
 import {
   CreateAvailabilityBody,
   ListAvailabilityQueryParams,
@@ -57,10 +57,11 @@ router.get("/slots", async (req, res) => {
     .from(availabilityTable)
     .where(eq(availabilityTable.date, date));
 
+  // Only consider non-rejected bookings for overlap checking
   const bookings = await db
     .select()
     .from(bookingsTable)
-    .where(eq(bookingsTable.date, date));
+    .where(and(eq(bookingsTable.date, date), ne(bookingsTable.paymentStatus, "rejected")));
 
   const slots: { startTime: string; endTime: string }[] = [];
 

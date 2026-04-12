@@ -210,8 +210,9 @@ export const ListBookingsResponseItem = zod.object({
   notes: zod.string().nullish(),
   withExtension: zod.boolean(),
   finalPrice: zod.number(),
+  depositAmount: zod.number(),
   durationHours: zod.number(),
-  depositPaid: zod.boolean(),
+  paymentProof: zod.string().nullish(),
   paymentStatus: zod.string(),
   createdAt: zod.coerce.date(),
 });
@@ -229,7 +230,7 @@ export const CreateBookingBody = zod.object({
   startTime: zod.string().describe("Start time in HH:MM (24h)"),
   notes: zod.string().nullish(),
   withExtension: zod.boolean().nullish(),
-  depositPaid: zod.boolean().nullish(),
+  paymentProof: zod.string().nullish(),
   paymentStatus: zod.string().nullish(),
 });
 
@@ -253,8 +254,9 @@ export const GetBookingResponse = zod.object({
   notes: zod.string().nullish(),
   withExtension: zod.boolean(),
   finalPrice: zod.number(),
+  depositAmount: zod.number(),
   durationHours: zod.number(),
-  depositPaid: zod.boolean(),
+  paymentProof: zod.string().nullish(),
   paymentStatus: zod.string(),
   createdAt: zod.coerce.date(),
 });
@@ -309,8 +311,9 @@ export const GetUpcomingBookingsResponseItem = zod.object({
   notes: zod.string().nullish(),
   withExtension: zod.boolean(),
   finalPrice: zod.number(),
+  depositAmount: zod.number(),
   durationHours: zod.number(),
-  depositPaid: zod.boolean(),
+  paymentProof: zod.string().nullish(),
   paymentStatus: zod.string(),
   createdAt: zod.coerce.date(),
 });

@@ -1,0 +1,105 @@
+Fix and improve the payment system and homepage UI in my full-stack braids booking website (Node.js + Express + MongoDB + frontend).
+
+---
+
+## 🏠 HOME PAGE DESIGN UPDATE (IMPORTANT)
+
+On the homepage:
+
+- Display all braid designs fetched from the database (NO hardcoded data)
+- Each design should appear as a clean visual card
+
+### Design card must show ONLY:
+- Image (main focus)
+- Name of design
+
+❌ DO NOT show:
+- Price
+- Duration
+- Any extra text details
+
+### Goal:
+Make homepage look like a modern gallery / portfolio of hairstyles (visual-first UI)
+
+---
+
+## 💰 PAYMENT RULE
+
+During booking payment step:
+
+- System must calculate 20% deposit from total appointment price
+- User must send payment to this number:
+
+📱 01228098802
+
+---
+
+## 📤 PAYMENT PROOF UPLOAD
+
+After payment instructions:
+
+- User must upload screenshot of Instapay transaction (required)
+- Store image in database linked to booking
+
+---
+
+## 🧠 PAYMENT VERIFICATION LOGIC
+
+After upload:
+
+- System must NOT auto-confirm payment immediately
+
+Validation rules:
+
+IF uploaded screenshot payment amount == 20% deposit
+   → paymentStatus = "verified"
+   → confirm booking
+ELSE
+   → paymentStatus = "rejected"
+   → DO NOT confirm booking
+
+---
+
+## 👨‍💼 ADMIN FALLBACK (IMPORTANT)
+
+If automatic verification is not possible:
+
+- Add admin panel section:
+  - View payment screenshots
+  - Approve / reject payments manually
+
+---
+
+## 🗂️ DATABASE UPDATE
+
+Booking schema must include:
+
+- paymentProof (image URL)
+- paymentStatus: pending | verified | rejected
+- depositAmount
+- totalPrice
+
+---
+
+## 🔁 FULL BOOKING FLOW
+
+1. User sees homepage (ONLY images + names)
+2. Select design
+3. Optional extension
+4. Choose time slot
+5. Payment page shows:
+   - Total price
+   - 20% deposit
+   - Instapay number (01228098802)
+6. Upload payment screenshot
+7. Wait for verification
+8. Only verified payments confirm booking
+
+---
+
+## 🎯 GOAL
+
+- Clean modern homepage (gallery style)
+- Secure payment system
+- No fake confirmations
+- All bookings depend on verified deposit payment

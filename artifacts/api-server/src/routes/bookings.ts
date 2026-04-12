@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { bookingsTable, designsTable } from "@workspace/db";
-import { eq, and, gte } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import {
   CreateBookingBody,
   ListBookingsQueryParams,
@@ -12,6 +12,7 @@ import { sendBookingNotification } from "../lib/mailer";
 
 const EXTENSION_PRICE = 400;
 const EXTENSION_HOURS = 1;
+const DEPOSIT_PERCENT = 0.2;
 
 const router = Router();
 
@@ -34,8 +35,9 @@ function serializeBooking(b: typeof bookingsTable.$inferSelect) {
     notes: b.notes ?? null,
     withExtension: b.withExtension,
     finalPrice: parseFloat(b.finalPrice),
+    depositAmount: parseFloat(b.depositAmount),
     durationHours: parseFloat(b.durationHours),
-    depositPaid: b.depositPaid,
+    paymentProof: b.paymentProof ?? null,
     paymentStatus: b.paymentStatus,
     createdAt: b.createdAt.toISOString(),
   };
@@ -77,7 +79,7 @@ router.post("/", async (req, res) => {
     startTime,
     notes,
     withExtension = false,
-    depositPaid = false,
+    paymentProof,
     paymentStatus = "pending",
   } = parsed.data;
 
@@ -95,21 +97,25 @@ router.post("/", async (req, res) => {
 
   const basePrice = parseFloat(design.price);
   const finalPrice = withExtension ? basePrice + EXTENSION_PRICE : basePrice;
+  const depositAmount = Math.round(finalPrice * DEPOSIT_PERCENT * 100) / 100;
 
   const startMinutes = timeToMinutes(startTime);
   const endMinutes = startMinutes + durationMinutes;
   const endTime = `${String(Math.floor(endMinutes / 60)).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`;
 
+  // Only check conflicts against non-rejected bookings
   const existingBookings = await db
     .select()
     .from(bookingsTable)
     .where(eq(bookingsTable.date, date));
 
-  const hasConflict = existingBookings.some((b) => {
-    const bStart = timeToMinutes(b.startTime);
-    const bEnd = timeToMinutes(b.endTime);
-    return startMinutes < bEnd && endMinutes > bStart;
-  });
+  const hasConflict = existingBookings
+    .filter((b) => b.paymentStatus !== "rejected")
+    .some((b) => {
+      const bStart = timeToMinutes(b.startTime);
+      const bEnd = timeToMinutes(b.endTime);
+      return startMinutes < bEnd && endMinutes > bStart;
+    });
 
   if (hasConflict) {
     res.status(409).json({ error: "This time slot conflicts with an existing booking" });
@@ -130,8 +136,10 @@ router.post("/", async (req, res) => {
       notes: notes ?? null,
       withExtension: withExtension ?? false,
       finalPrice: finalPrice.toFixed(2),
+      depositAmount: depositAmount.toFixed(2),
       durationHours: effectiveDurationHours.toFixed(2),
-      depositPaid: depositPaid ?? false,
+      paymentProof: paymentProof ?? null,
+      depositPaid: false,
       paymentStatus: paymentStatus ?? "pending",
     })
     .returning();
@@ -147,7 +155,7 @@ router.post("/", async (req, res) => {
     notes,
     withExtension: withExtension ?? false,
     finalPrice,
-    depositPaid: depositPaid ?? false,
+    depositPaid: false,
   }).catch(() => {});
 
   res.status(201).json(serializeBooking(booking));

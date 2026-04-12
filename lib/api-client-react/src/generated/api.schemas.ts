@@ -100,13 +100,15 @@ export interface Booking {
   notes?: string | null;
   /** Whether extension hair was added */
   withExtension: boolean;
-  /** Final price in EGP */
+  /** Final total price in EGP */
   finalPrice: number;
+  /** 20% deposit amount in EGP */
+  depositAmount: number;
   /** Total appointment duration in hours */
   durationHours: number;
-  /** Whether the 20% deposit was paid */
-  depositPaid: boolean;
-  /** Payment status: pending | deposit_paid | paid */
+  /** URL of the uploaded payment proof screenshot */
+  paymentProof?: string | null;
+  /** Payment status: pending | verified | rejected */
   paymentStatus: string;
   createdAt: string;
 }
@@ -123,9 +125,9 @@ export interface CreateBookingBody {
   notes?: string | null;
   /** Whether to add extension (+400 EGP, +1 hour) */
   withExtension?: boolean | null;
-  /** Whether the deposit was paid */
-  depositPaid?: boolean | null;
-  /** Payment status: pending | deposit_paid | paid */
+  /** URL of the uploaded payment proof screenshot */
+  paymentProof?: string | null;
+  /** Payment status: pending | verified | rejected */
   paymentStatus?: string | null;
 }
 
