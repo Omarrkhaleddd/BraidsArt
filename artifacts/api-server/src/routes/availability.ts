@@ -11,6 +11,8 @@ import {
   GetAvailableSlotsQueryParams,
 } from "@workspace/api-zod";
 
+const EXTENSION_HOURS = 1;
+
 const router = Router();
 
 function timeToMinutes(time: string): number {
@@ -28,12 +30,13 @@ router.get("/slots", async (req, res) => {
   const parsed = GetAvailableSlotsQueryParams.safeParse({
     date: req.query.date,
     designId: req.query.designId ? Number(req.query.designId) : undefined,
+    withExtension: req.query.withExtension,
   });
   if (!parsed.success) {
     res.status(400).json({ error: "date and designId are required" });
     return;
   }
-  const { date, designId } = parsed.data;
+  const { date, designId, withExtension } = parsed.data;
 
   const [design] = await db
     .select()
@@ -43,8 +46,11 @@ router.get("/slots", async (req, res) => {
     res.status(400).json({ error: "Design not found" });
     return;
   }
-  const durationHours = parseFloat(design.durationHours);
-  const durationMinutes = durationHours * 60;
+  const baseDurationHours = parseFloat(design.durationHours);
+  const effectiveDurationHours = withExtension
+    ? baseDurationHours + EXTENSION_HOURS
+    : baseDurationHours;
+  const durationMinutes = effectiveDurationHours * 60;
 
   const availability = await db
     .select()
@@ -87,7 +93,7 @@ router.get("/slots", async (req, res) => {
     date,
     designId,
     designName: design.name,
-    durationHours,
+    durationHours: effectiveDurationHours,
     slots,
   });
 });

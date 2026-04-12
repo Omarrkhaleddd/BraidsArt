@@ -10,11 +10,35 @@ import {
 } from "@workspace/api-zod";
 import { sendBookingNotification } from "../lib/mailer";
 
+const EXTENSION_PRICE = 400;
+const EXTENSION_HOURS = 1;
+
 const router = Router();
 
 function timeToMinutes(time: string): number {
   const [hours, minutes] = time.split(":").map(Number);
   return hours * 60 + (minutes || 0);
+}
+
+function serializeBooking(b: typeof bookingsTable.$inferSelect) {
+  return {
+    id: b.id,
+    customerName: b.customerName,
+    customerPhone: b.customerPhone ?? null,
+    customerEmail: b.customerEmail ?? null,
+    designId: b.designId,
+    designName: b.designName,
+    date: b.date,
+    startTime: b.startTime,
+    endTime: b.endTime,
+    notes: b.notes ?? null,
+    withExtension: b.withExtension,
+    finalPrice: parseFloat(b.finalPrice),
+    durationHours: parseFloat(b.durationHours),
+    depositPaid: b.depositPaid,
+    paymentStatus: b.paymentStatus,
+    createdAt: b.createdAt.toISOString(),
+  };
 }
 
 router.get("/", async (req, res) => {
@@ -34,21 +58,7 @@ router.get("/", async (req, res) => {
       ? await db.select().from(bookingsTable).where(and(...conditions)).orderBy(bookingsTable.date, bookingsTable.startTime)
       : await db.select().from(bookingsTable).orderBy(bookingsTable.date, bookingsTable.startTime);
 
-  res.json(
-    bookings.map((b) => ({
-      id: b.id,
-      customerName: b.customerName,
-      customerPhone: b.customerPhone ?? null,
-      customerEmail: b.customerEmail ?? null,
-      designId: b.designId,
-      designName: b.designName,
-      date: b.date,
-      startTime: b.startTime,
-      endTime: b.endTime,
-      notes: b.notes ?? null,
-      createdAt: b.createdAt.toISOString(),
-    }))
-  );
+  res.json(bookings.map(serializeBooking));
 });
 
 router.post("/", async (req, res) => {
@@ -58,14 +68,34 @@ router.post("/", async (req, res) => {
     return;
   }
 
-  const { customerName, customerPhone, customerEmail, designId, date, startTime, notes } = parsed.data;
+  const {
+    customerName,
+    customerPhone,
+    customerEmail,
+    designId,
+    date,
+    startTime,
+    notes,
+    withExtension = false,
+    depositPaid = false,
+    paymentStatus = "pending",
+  } = parsed.data;
 
   const [design] = await db.select().from(designsTable).where(eq(designsTable.id, designId));
   if (!design) {
     res.status(400).json({ error: "Design not found" });
     return;
   }
-  const durationMinutes = parseFloat(design.durationHours) * 60;
+
+  const baseDurationHours = parseFloat(design.durationHours);
+  const effectiveDurationHours = withExtension
+    ? baseDurationHours + EXTENSION_HOURS
+    : baseDurationHours;
+  const durationMinutes = effectiveDurationHours * 60;
+
+  const basePrice = parseFloat(design.price);
+  const finalPrice = withExtension ? basePrice + EXTENSION_PRICE : basePrice;
+
   const startMinutes = timeToMinutes(startTime);
   const endMinutes = startMinutes + durationMinutes;
   const endTime = `${String(Math.floor(endMinutes / 60)).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`;
@@ -98,6 +128,11 @@ router.post("/", async (req, res) => {
       startTime,
       endTime,
       notes: notes ?? null,
+      withExtension: withExtension ?? false,
+      finalPrice: finalPrice.toFixed(2),
+      durationHours: effectiveDurationHours.toFixed(2),
+      depositPaid: depositPaid ?? false,
+      paymentStatus: paymentStatus ?? "pending",
     })
     .returning();
 
@@ -110,21 +145,12 @@ router.post("/", async (req, res) => {
     startTime,
     endTime,
     notes,
+    withExtension: withExtension ?? false,
+    finalPrice,
+    depositPaid: depositPaid ?? false,
   }).catch(() => {});
 
-  res.status(201).json({
-    id: booking.id,
-    customerName: booking.customerName,
-    customerPhone: booking.customerPhone ?? null,
-    customerEmail: booking.customerEmail ?? null,
-    designId: booking.designId,
-    designName: booking.designName,
-    date: booking.date,
-    startTime: booking.startTime,
-    endTime: booking.endTime,
-    notes: booking.notes ?? null,
-    createdAt: booking.createdAt.toISOString(),
-  });
+  res.status(201).json(serializeBooking(booking));
 });
 
 router.get("/:id", async (req, res) => {
@@ -141,19 +167,7 @@ router.get("/:id", async (req, res) => {
     res.status(404).json({ error: "Booking not found" });
     return;
   }
-  res.json({
-    id: booking.id,
-    customerName: booking.customerName,
-    customerPhone: booking.customerPhone ?? null,
-    customerEmail: booking.customerEmail ?? null,
-    designId: booking.designId,
-    designName: booking.designName,
-    date: booking.date,
-    startTime: booking.startTime,
-    endTime: booking.endTime,
-    notes: booking.notes ?? null,
-    createdAt: booking.createdAt.toISOString(),
-  });
+  res.json(serializeBooking(booking));
 });
 
 router.delete("/:id", async (req, res) => {

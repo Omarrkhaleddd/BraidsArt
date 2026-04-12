@@ -98,6 +98,16 @@ export interface Booking {
   /** Booking end HH:MM (24h) */
   endTime: string;
   notes?: string | null;
+  /** Whether extension hair was added */
+  withExtension: boolean;
+  /** Final price in EGP */
+  finalPrice: number;
+  /** Total appointment duration in hours */
+  durationHours: number;
+  /** Whether the 20% deposit was paid */
+  depositPaid: boolean;
+  /** Payment status: pending | deposit_paid | paid */
+  paymentStatus: string;
   createdAt: string;
 }
 
@@ -111,6 +121,12 @@ export interface CreateBookingBody {
   /** Start time in HH:MM (24h) */
   startTime: string;
   notes?: string | null;
+  /** Whether to add extension (+400 EGP, +1 hour) */
+  withExtension?: boolean | null;
+  /** Whether the deposit was paid */
+  depositPaid?: boolean | null;
+  /** Payment status: pending | deposit_paid | paid */
+  paymentStatus?: string | null;
 }
 
 export type AdminSummaryPopularDesignsItem = {
@@ -143,6 +159,10 @@ export type GetAvailableSlotsParams = {
    * ID of the selected design
    */
   designId: number;
+  /**
+   * Whether to add extension time (+1 hour) to slot calculation
+   */
+  withExtension?: boolean;
 };
 
 export type ListBookingsParams = {

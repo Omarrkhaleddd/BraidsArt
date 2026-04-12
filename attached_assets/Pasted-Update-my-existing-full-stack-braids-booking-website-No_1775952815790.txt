@@ -1,0 +1,104 @@
+Update my existing full-stack braids booking website (Node.js + Express + MongoDB + Frontend).
+
+I want to add the following features WITHOUT breaking existing booking logic:
+
+---
+
+## 1. Design Extension Option
+
+After the user selects a braid design, show a new option called:
+
+"With Extension"
+
+- This option should be optional (toggle or checkbox)
+- If selected:
+  - Add +400 EGP to the total price of the appointment
+  - Add +1 hour to the duration of the selected design
+
+Important:
+- The updated price and duration must be reflected in:
+  - available time slots calculation
+  - final booking summary
+  - payment amount
+
+---
+
+## 2. Booking Flow Update
+
+The flow must become:
+
+1. Select Design
+2. Choose "With Extension" (optional)
+3. Select Date
+4. Select Time Slot (must be recalculated dynamically based on updated duration)
+5. Go to Payment page
+
+---
+
+## 3. Payment System (IMPORTANT)
+
+After user selects time slot:
+
+- Redirect to Payment page (final step before booking confirmation)
+
+Payment rules:
+- User must pay 20% deposit ONLY (not full price)
+- Deposit = 20% of (design price + extension if selected)
+
+---
+
+## 4. Instapay Payment Integration (Simulation or API-ready)
+
+- Payment method: Instapay (Egypt)
+- If real API is not available:
+  - Create a "payment simulation page"
+  - Show:
+    - Total price
+    - Deposit amount (20%)
+    - "I have paid" button
+
+---
+
+## 5. Booking Confirmation Logic
+
+Booking is only confirmed if:
+
+- User completed payment step (deposit marked as paid)
+
+After confirmation:
+- Save booking in MongoDB
+- Mark time slot as unavailable (prevent overlap logic must remain working)
+
+---
+
+## 6. Admin & System Rules (DO NOT BREAK)
+
+- Keep existing:
+  - Designs CRUD
+  - Availability system (time ranges)
+  - Overlap prevention logic
+- Everything must remain dynamic from database
+
+---
+
+## 7. UI Requirements (simple)
+
+- Clean mobile-friendly UI
+- Show updated price live when extension is selected
+- Show updated duration live
+- Show deposit clearly before payment
+
+---
+
+## 8. Data Updates
+
+Update booking schema to include:
+- withExtension (boolean)
+- finalPrice
+- duration
+- depositPaid (boolean)
+- paymentStatus
+
+---
+
+Build this in clean modular code and ensure no existing booking logic is broken.

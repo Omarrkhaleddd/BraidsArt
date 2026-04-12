@@ -170,6 +170,10 @@ export const DeleteAvailabilityResponse = zod.object({
 export const GetAvailableSlotsQueryParams = zod.object({
   date: zod.coerce.string(),
   designId: zod.coerce.number(),
+  withExtension: zod
+    .enum(["true", "false", "1", "0"])
+    .optional()
+    .transform((v) => v === "true" || v === "1"),
 });
 
 export const GetAvailableSlotsResponse = zod.object({
@@ -204,6 +208,11 @@ export const ListBookingsResponseItem = zod.object({
   startTime: zod.string().describe("Booking start HH:MM (24h)"),
   endTime: zod.string().describe("Booking end HH:MM (24h)"),
   notes: zod.string().nullish(),
+  withExtension: zod.boolean(),
+  finalPrice: zod.number(),
+  durationHours: zod.number(),
+  depositPaid: zod.boolean(),
+  paymentStatus: zod.string(),
   createdAt: zod.coerce.date(),
 });
 export const ListBookingsResponse = zod.array(ListBookingsResponseItem);
@@ -219,6 +228,9 @@ export const CreateBookingBody = zod.object({
   date: zod.string().describe("Date in YYYY-MM-DD format"),
   startTime: zod.string().describe("Start time in HH:MM (24h)"),
   notes: zod.string().nullish(),
+  withExtension: zod.boolean().nullish(),
+  depositPaid: zod.boolean().nullish(),
+  paymentStatus: zod.string().nullish(),
 });
 
 /**
@@ -239,6 +251,11 @@ export const GetBookingResponse = zod.object({
   startTime: zod.string().describe("Booking start HH:MM (24h)"),
   endTime: zod.string().describe("Booking end HH:MM (24h)"),
   notes: zod.string().nullish(),
+  withExtension: zod.boolean(),
+  finalPrice: zod.number(),
+  durationHours: zod.number(),
+  depositPaid: zod.boolean(),
+  paymentStatus: zod.string(),
   createdAt: zod.coerce.date(),
 });
 
@@ -290,6 +307,11 @@ export const GetUpcomingBookingsResponseItem = zod.object({
   startTime: zod.string().describe("Booking start HH:MM (24h)"),
   endTime: zod.string().describe("Booking end HH:MM (24h)"),
   notes: zod.string().nullish(),
+  withExtension: zod.boolean(),
+  finalPrice: zod.number(),
+  durationHours: zod.number(),
+  depositPaid: zod.boolean(),
+  paymentStatus: zod.string(),
   createdAt: zod.coerce.date(),
 });
 export const GetUpcomingBookingsResponse = zod.array(

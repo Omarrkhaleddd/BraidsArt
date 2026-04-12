@@ -3,19 +3,8 @@ import { AdminLayout } from "@/components/admin-layout";
 import { useListBookings, useDeleteBooking, getListBookingsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
-import {
-  Table,
-  Body,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  TableBody
-} from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,7 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Trash2, Calendar as CalendarIcon, Phone, Mail, Clock, FilterX } from "lucide-react";
+import { Trash2, Calendar as CalendarIcon, Phone, Mail, Clock, FilterX, Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -38,12 +27,10 @@ import { Badge } from "@/components/ui/badge";
 export default function AdminBookings() {
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
   const dateStr = dateFilter ? format(dateFilter, "yyyy-MM-dd") : undefined;
-  
+
   const { data: bookings, isLoading } = useListBookings(dateStr ? { date: dateStr } : undefined);
-  
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  
   const deleteBooking = useDeleteBooking();
 
   const handleDelete = (id: number) => {
@@ -54,7 +41,7 @@ export default function AdminBookings() {
           queryClient.invalidateQueries({ queryKey: getListBookingsQueryKey(dateStr ? { date: dateStr } : undefined) });
           toast({ title: "Booking cancelled successfully" });
         },
-        onError: () => toast({ title: "Failed to cancel booking", variant: "destructive" })
+        onError: () => toast({ title: "Failed to cancel booking", variant: "destructive" }),
       }
     );
   };
@@ -67,32 +54,23 @@ export default function AdminBookings() {
             <h1 className="text-3xl font-serif font-bold tracking-tight">Bookings</h1>
             <p className="text-muted-foreground mt-1">View and manage all customer appointments.</p>
           </div>
-          
+
           <div className="flex items-center gap-2">
             {dateFilter && (
-              <Button 
-                variant="ghost" 
-                onClick={() => setDateFilter(undefined)}
-                className="text-muted-foreground h-10 px-3"
-              >
+              <Button variant="ghost" onClick={() => setDateFilter(undefined)} className="text-muted-foreground h-10 px-3">
                 <FilterX className="h-4 w-4 mr-2" />
                 Clear
               </Button>
             )}
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className={`w-[240px] justify-start text-left font-normal h-10 \${!dateFilter ? "text-muted-foreground" : ""}`}>
+                <Button variant="outline" className={`w-[220px] justify-start text-left font-normal h-10 ${!dateFilter ? "text-muted-foreground" : ""}`}>
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {dateFilter ? format(dateFilter, "PPP") : <span>Filter by date</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                  mode="single"
-                  selected={dateFilter}
-                  onSelect={setDateFilter}
-                  initialFocus
-                />
+                <Calendar mode="single" selected={dateFilter} onSelect={setDateFilter} initialFocus />
               </PopoverContent>
             </Popover>
           </div>
@@ -112,56 +90,76 @@ export default function AdminBookings() {
                 <Table>
                   <TableHeader className="bg-muted/50">
                     <TableRow>
-                      <TableHead className="w-[200px]">Customer</TableHead>
+                      <TableHead className="w-[180px]">Customer</TableHead>
                       <TableHead>Style</TableHead>
                       <TableHead>Date & Time</TableHead>
+                      <TableHead>Price & Payment</TableHead>
                       <TableHead>Contact</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {bookings.map(booking => {
+                    {bookings.map((booking) => {
                       const isPast = new Date(`${booking.date}T${booking.endTime}`) < new Date();
+                      const depositAmount = Math.round(booking.finalPrice * 0.2);
                       return (
                         <TableRow key={booking.id} className={isPast ? "opacity-60 bg-muted/20" : ""}>
                           <TableCell>
                             <div className="font-medium">{booking.customerName}</div>
                             {booking.notes && (
-                              <div className="text-xs text-muted-foreground mt-1 truncate max-w-[180px]" title={booking.notes}>
+                              <div className="text-xs text-muted-foreground mt-1 truncate max-w-[160px]" title={booking.notes}>
                                 Note: {booking.notes}
                               </div>
                             )}
                           </TableCell>
                           <TableCell>
-                            <Badge variant="secondary" className="font-normal border-primary/20 bg-primary/5 text-primary">
-                              {booking.designName}
-                            </Badge>
+                            <div className="flex flex-col gap-1">
+                              <Badge variant="secondary" className="font-normal border-primary/20 bg-primary/5 text-primary w-fit">
+                                {booking.designName}
+                              </Badge>
+                              {booking.withExtension && (
+                                <Badge variant="outline" className="text-xs border-amber-400 text-amber-700 bg-amber-50 w-fit gap-1">
+                                  <Sparkles className="h-2.5 w-2.5" /> Extension
+                                </Badge>
+                              )}
+                              <span className="text-xs text-muted-foreground">{booking.durationHours}h</span>
+                            </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-col gap-1">
                               <span className="font-medium whitespace-nowrap">{format(new Date(booking.date), "MMM do, yyyy")}</span>
                               <span className="text-xs text-muted-foreground flex items-center">
                                 <Clock className="h-3 w-3 mr-1" />
-                                {booking.startTime} - {booking.endTime}
+                                {booking.startTime} – {booking.endTime}
                               </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col gap-1 text-sm">
+                              <span className="font-semibold">{Number(booking.finalPrice).toLocaleString()} EGP</span>
+                              <span className="text-xs text-muted-foreground">Deposit: {depositAmount.toLocaleString()} EGP</span>
+                              <Badge
+                                variant={booking.depositPaid ? "default" : "outline"}
+                                className={`text-xs w-fit ${booking.depositPaid ? "bg-green-100 text-green-800 border-green-200 hover:bg-green-100" : "text-muted-foreground"}`}
+                              >
+                                {booking.depositPaid ? "✓ Deposit Paid" : "Pending"}
+                              </Badge>
                             </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-col gap-1.5 text-sm">
                               {booking.customerPhone && (
                                 <span className="flex items-center text-muted-foreground">
-                                  <Phone className="h-3 w-3 mr-2" />
-                                  {booking.customerPhone}
+                                  <Phone className="h-3 w-3 mr-2" />{booking.customerPhone}
                                 </span>
                               )}
                               {booking.customerEmail && (
                                 <span className="flex items-center text-muted-foreground">
-                                  <Mail className="h-3 w-3 mr-2" />
-                                  {booking.customerEmail}
+                                  <Mail className="h-3 w-3 mr-2" />{booking.customerEmail}
                                 </span>
                               )}
                               {!booking.customerPhone && !booking.customerEmail && (
-                                <span className="text-muted-foreground italic text-xs">No contact provided</span>
+                                <span className="text-muted-foreground italic text-xs">No contact</span>
                               )}
                             </div>
                           </TableCell>
@@ -176,12 +174,12 @@ export default function AdminBookings() {
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>Cancel Appointment?</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    Are you sure you want to cancel the appointment for <strong>{booking.customerName}</strong> on {format(new Date(booking.date), "MMM do")}? This action cannot be undone.
+                                    Cancel the appointment for <strong>{booking.customerName}</strong> on {format(new Date(booking.date), "MMM do")}? This cannot be undone.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Keep Booking</AlertDialogCancel>
-                                  <AlertDialogAction 
+                                  <AlertDialogAction
                                     onClick={() => handleDelete(booking.id)}
                                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                   >
@@ -192,7 +190,7 @@ export default function AdminBookings() {
                             </AlertDialog>
                           </TableCell>
                         </TableRow>
-                      )
+                      );
                     })}
                   </TableBody>
                 </Table>
@@ -204,9 +202,9 @@ export default function AdminBookings() {
                 </div>
                 <h3 className="text-lg font-medium mb-2">No bookings found</h3>
                 <p className="text-muted-foreground">
-                  {dateFilter 
-                    ? `There are no appointments scheduled for ${format(dateFilter, "MMMM do, yyyy")}.`
-                    : "Your schedule is completely clear."}
+                  {dateFilter
+                    ? `No appointments scheduled for ${format(dateFilter, "MMMM do, yyyy")}.`
+                    : "Your schedule is clear."}
                 </p>
                 {dateFilter && (
                   <Button variant="outline" className="mt-6" onClick={() => setDateFilter(undefined)}>

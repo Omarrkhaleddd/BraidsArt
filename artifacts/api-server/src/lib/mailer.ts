@@ -20,6 +20,9 @@ export interface BookingNotificationData {
   startTime: string;
   endTime: string;
   notes?: string | null;
+  withExtension?: boolean;
+  finalPrice?: number;
+  depositPaid?: boolean;
 }
 
 export async function sendBookingNotification(data: BookingNotificationData): Promise<void> {
@@ -30,6 +33,7 @@ export async function sendBookingNotification(data: BookingNotificationData): Pr
   }
 
   const subject = `New Booking: ${data.designName} on ${data.date}`;
+  const depositAmount = data.finalPrice ? (data.finalPrice * 0.2).toFixed(0) : null;
 
   const html = `
     <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; background: #faf7f4; padding: 32px; border-radius: 12px;">
@@ -42,7 +46,7 @@ export async function sendBookingNotification(data: BookingNotificationData): Pr
         </tr>
         <tr>
           <td style="padding: 12px 16px; color: #8B4513; font-weight: bold; width: 40%; border-bottom: 1px solid #f0e8e0;">Style</td>
-          <td style="padding: 12px 16px; border-bottom: 1px solid #f0e8e0;">${data.designName}</td>
+          <td style="padding: 12px 16px; border-bottom: 1px solid #f0e8e0;">${data.designName}${data.withExtension ? ' <span style="background:#c17b4a;color:white;padding:2px 8px;border-radius:4px;font-size:12px;">+Extension</span>' : ""}</td>
         </tr>
         <tr>
           <td style="padding: 12px 16px; color: #8B4513; font-weight: bold; border-bottom: 1px solid #f0e8e0;">Date</td>
@@ -52,6 +56,16 @@ export async function sendBookingNotification(data: BookingNotificationData): Pr
           <td style="padding: 12px 16px; color: #8B4513; font-weight: bold; border-bottom: 1px solid #f0e8e0;">Time</td>
           <td style="padding: 12px 16px; border-bottom: 1px solid #f0e8e0;">${data.startTime} – ${data.endTime}</td>
         </tr>
+        ${data.finalPrice != null ? `
+        <tr>
+          <td style="padding: 12px 16px; color: #8B4513; font-weight: bold; border-bottom: 1px solid #f0e8e0;">Total Price</td>
+          <td style="padding: 12px 16px; border-bottom: 1px solid #f0e8e0;"><strong>${data.finalPrice} EGP</strong></td>
+        </tr>` : ""}
+        ${depositAmount ? `
+        <tr>
+          <td style="padding: 12px 16px; color: #8B4513; font-weight: bold; border-bottom: 1px solid #f0e8e0;">Deposit (20%)</td>
+          <td style="padding: 12px 16px; border-bottom: 1px solid #f0e8e0;">${depositAmount} EGP — ${data.depositPaid ? "✅ Paid" : "⏳ Pending"}</td>
+        </tr>` : ""}
         <tr style="background: #fffaf7;">
           <td colspan="2" style="padding: 12px 16px; font-weight: bold; font-size: 14px; color: #8B4513; border-bottom: 1px solid #f0e8e0; border-top: 8px solid #f0e8e0;">Customer Info</td>
         </tr>
