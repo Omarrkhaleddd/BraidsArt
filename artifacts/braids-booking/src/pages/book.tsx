@@ -38,9 +38,10 @@ export default function Book() {
   const { data: designs, isLoading: designsLoading } = useListDesigns();
   const dateStr = selectedDate ? format(selectedDate, "yyyy-MM-dd") : "";
 
+  const slotsQueryKey = getGetAvailableSlotsQueryKey({ date: dateStr, designId: selectedDesignId!, withExtension });
   const { data: availableSlotsResponse, isLoading: slotsLoading } = useGetAvailableSlots(
     { date: dateStr, designId: selectedDesignId!, withExtension },
-    { query: { enabled: !!selectedDate && !!selectedDesignId } }
+    { query: { enabled: !!selectedDate && !!selectedDesignId, queryKey: slotsQueryKey } }
   );
 
   const createBooking = useCreateBooking();
