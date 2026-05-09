@@ -155,7 +155,6 @@ router.post("/", async (req, res) => {
     notes,
     withExtension: withExtension ?? false,
     finalPrice,
-    depositPaid: false,
   }).catch(() => {});
 
   res.status(201).json(serializeBooking(booking));
