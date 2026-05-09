@@ -9,19 +9,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
-import { Clock, Calendar as CalendarIcon, CheckCircle2, ArrowLeft, Sparkles, CreditCard, Scissors } from "lucide-react";
+import { Clock, Calendar as CalendarIcon, CheckCircle2, ArrowLeft, Scissors } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQueryClient } from "@tanstack/react-query";
 
 const EXTENSION_PRICE = 400;
 const EXTENSION_HOURS = 1;
-const DEPOSIT_PERCENT = 0.2;
 
 export default function Book() {
   const searchParams = new URLSearchParams(window.location.search);
   const initialDesignId = searchParams.get("designId") ? parseInt(searchParams.get("designId")!) : null;
 
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [selectedDesignId, setSelectedDesignId] = useState<number | null>(initialDesignId);
   const [withExtension, setWithExtension] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -32,7 +31,7 @@ export default function Book() {
   const [customerEmail, setCustomerEmail] = useState("");
   const [notes, setNotes] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
-  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -51,7 +50,6 @@ export default function Book() {
   const baseDuration = selectedDesign ? parseFloat(String(selectedDesign.durationHours)) : 0;
   const finalPrice = withExtension ? basePrice + EXTENSION_PRICE : basePrice;
   const finalDuration = withExtension ? baseDuration + EXTENSION_HOURS : baseDuration;
-  const depositAmount = Math.round(finalPrice * DEPOSIT_PERCENT);
 
   const handleDesignSelect = (id: number) => {
     setSelectedDesignId(id);
@@ -71,17 +69,11 @@ export default function Book() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleDetailsSubmit = (e: React.FormEvent) => {
+  const handleConfirm = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customerName) return;
-    setStep(4);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const handlePayment = () => {
     if (!selectedDesignId || !selectedDate || !selectedSlot || !customerName) return;
-    setPaymentLoading(true);
 
+    setIsSubmitting(true);
     createBooking.mutate(
       {
         data: {
@@ -93,13 +85,11 @@ export default function Book() {
           customerEmail: customerEmail || undefined,
           notes: notes || undefined,
           withExtension,
-          depositPaid: true,
-          paymentStatus: "deposit_paid",
         },
       },
       {
         onSuccess: () => {
-          setPaymentLoading(false);
+          setIsSubmitting(false);
           setIsSuccess(true);
           queryClient.invalidateQueries({
             queryKey: getGetAvailableSlotsQueryKey({ date: format(selectedDate!, "yyyy-MM-dd"), designId: selectedDesignId! }),
@@ -107,7 +97,7 @@ export default function Book() {
           window.scrollTo({ top: 0, behavior: "smooth" });
         },
         onError: (error: any) => {
-          setPaymentLoading(false);
+          setIsSubmitting(false);
           toast({
             title: "Booking failed",
             description: error?.message || "There was an error booking your appointment.",
@@ -157,11 +147,11 @@ export default function Book() {
                   <span>{selectedSlot?.startTime} — {finalDuration} hrs</span>
                 </div>
                 <div className="flex items-center gap-3 text-foreground/80">
-                  <CreditCard className="h-5 w-5 text-primary shrink-0" />
-                  <span>Deposit paid: <strong>{depositAmount} EGP</strong> (20% of {finalPrice} EGP)</span>
+                  <Scissors className="h-5 w-5 text-primary shrink-0" />
+                  <span>Total price: <strong>{finalPrice.toLocaleString()} EGP</strong></span>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground">Remaining balance of <strong>{finalPrice - depositAmount} EGP</strong> is due on the day of your appointment.</p>
+              <p className="text-sm text-muted-foreground">See you at your appointment. We look forward to seeing you!</p>
               <Button className="mt-4 rounded-full" size="lg" onClick={resetFlow}>
                 Book Another Appointment
               </Button>
@@ -173,7 +163,7 @@ export default function Book() {
     );
   }
 
-  const stepLabels = ["Style", "Date & Time", "Details", "Payment"];
+  const stepLabels = ["Style", "Date & Time", "Confirm"];
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-muted/30">
@@ -184,8 +174,8 @@ export default function Book() {
           <p className="text-muted-foreground text-lg">Let's get you scheduled for your next beautiful style.</p>
         </div>
 
-        {/* 4-step progress bar */}
-        <div className="flex items-center justify-center mb-10 max-w-2xl mx-auto">
+        {/* 3-step progress bar */}
+        <div className="flex items-center justify-center mb-10 max-w-xl mx-auto">
           {stepLabels.map((label, i) => {
             const n = i + 1;
             const active = step >= n;
@@ -371,7 +361,7 @@ export default function Book() {
             </div>
           )}
 
-          {/* ─── STEP 3: Customer Details ─── */}
+          {/* ─── STEP 3: Confirm Booking ─── */}
           {step === 3 && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-2xl mx-auto">
               <div className="flex items-center mb-6">
@@ -379,7 +369,7 @@ export default function Book() {
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div>
-                  <h2 className="text-2xl font-serif font-semibold">Your Details</h2>
+                  <h2 className="text-2xl font-serif font-semibold">Confirm Booking</h2>
                   <p className="text-sm text-muted-foreground">Almost done — just a few details.</p>
                 </div>
               </div>
@@ -410,7 +400,7 @@ export default function Book() {
                 </div>
               </div>
 
-              <form onSubmit={handleDetailsSubmit} className="space-y-5">
+              <form onSubmit={handleConfirm} className="space-y-5">
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name <span className="text-destructive">*</span></Label>
                   <Input id="name" placeholder="Jane Doe" value={customerName} onChange={(e) => setCustomerName(e.target.value)} required className="h-12 bg-background" />
@@ -432,93 +422,14 @@ export default function Book() {
                   <Textarea id="notes" placeholder="Any specific requests or information we should know?" value={notes} onChange={(e) => setNotes(e.target.value)} className="min-h-[80px] bg-background" />
                 </div>
 
-                <Button type="submit" className="w-full h-13 text-base rounded-full mt-2" disabled={!customerName}>
-                  Continue to Payment
+                <Button
+                  type="submit"
+                  className="w-full h-13 text-base rounded-full mt-2"
+                  disabled={!customerName || isSubmitting}
+                >
+                  {isSubmitting ? "Booking..." : "Confirm Appointment"}
                 </Button>
               </form>
-            </div>
-          )}
-
-          {/* ─── STEP 4: Payment (Instapay Simulation) ─── */}
-          {step === 4 && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-xl mx-auto">
-              <div className="flex items-center mb-6">
-                <Button variant="ghost" size="icon" onClick={() => setStep(3)} className="mr-2 -ml-2">
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
-                <div>
-                  <h2 className="text-2xl font-serif font-semibold">Deposit Payment</h2>
-                  <p className="text-sm text-muted-foreground">Pay 20% to secure your slot</p>
-                </div>
-              </div>
-
-              {/* Booking summary compact */}
-              <div className="bg-muted/60 rounded-xl p-4 mb-6 text-sm space-y-1.5">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Style</span>
-                  <span className="font-medium">{selectedDesign?.name}{withExtension ? " + Extension" : ""}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Date & Time</span>
-                  <span className="font-medium">{selectedDate && format(selectedDate, "MMM do")} at {selectedSlot?.startTime}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Duration</span>
-                  <span className="font-medium">{finalDuration} hours</span>
-                </div>
-              </div>
-
-              {/* Payment breakdown */}
-              <div className="border border-border rounded-xl overflow-hidden mb-6">
-                <div className="bg-primary/5 px-5 py-4 border-b border-border">
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground text-sm">Total appointment price</span>
-                    <span className="font-semibold text-foreground">{finalPrice.toLocaleString()} EGP</span>
-                  </div>
-                </div>
-                <div className="px-5 py-5 bg-card">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-bold text-lg text-foreground">Deposit Required (20%)</p>
-                      <p className="text-muted-foreground text-sm mt-0.5">Remaining {(finalPrice - depositAmount).toLocaleString()} EGP due on the day</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-3xl text-primary">{depositAmount.toLocaleString()}</p>
-                      <p className="text-muted-foreground text-sm">EGP</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Instapay instructions */}
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6">
-                <div className="flex items-start gap-3">
-                  <CreditCard className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="font-semibold text-amber-900 mb-1">Pay via Instapay</p>
-                    <p className="text-amber-800 text-sm leading-relaxed">
-                      Send <strong>{depositAmount.toLocaleString()} EGP</strong> to the Instapay number provided by your salon.<br />
-                      Once you have completed the transfer, click the button below to confirm your booking.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <Button
-                className="w-full h-14 text-lg rounded-full font-bold"
-                onClick={handlePayment}
-                disabled={paymentLoading || createBooking.isPending}
-              >
-                {paymentLoading || createBooking.isPending ? (
-                  <span className="flex items-center gap-2"><Scissors className="h-5 w-5 animate-spin" /> Confirming Booking...</span>
-                ) : (
-                  <span className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5" /> I Have Paid — Confirm Booking</span>
-                )}
-              </Button>
-
-              <p className="text-center text-xs text-muted-foreground mt-4">
-                By confirming, you agree that you have completed the Instapay deposit of {depositAmount.toLocaleString()} EGP.
-              </p>
             </div>
           )}
 

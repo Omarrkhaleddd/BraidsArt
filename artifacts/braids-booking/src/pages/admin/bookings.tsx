@@ -93,7 +93,7 @@ export default function AdminBookings() {
                       <TableHead className="w-[180px]">Customer</TableHead>
                       <TableHead>Style</TableHead>
                       <TableHead>Date & Time</TableHead>
-                      <TableHead>Price & Payment</TableHead>
+                      <TableHead>Price</TableHead>
                       <TableHead>Contact</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -101,7 +101,6 @@ export default function AdminBookings() {
                   <TableBody>
                     {bookings.map((booking) => {
                       const isPast = new Date(`${booking.date}T${booking.endTime}`) < new Date();
-                      const depositAmount = Math.round(booking.finalPrice * 0.2);
                       return (
                         <TableRow key={booking.id} className={isPast ? "opacity-60 bg-muted/20" : ""}>
                           <TableCell>
@@ -135,16 +134,7 @@ export default function AdminBookings() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="flex flex-col gap-1 text-sm">
-                              <span className="font-semibold">{Number(booking.finalPrice).toLocaleString()} EGP</span>
-                              <span className="text-xs text-muted-foreground">Deposit: {depositAmount.toLocaleString()} EGP</span>
-                              <Badge
-                                variant={booking.depositPaid ? "default" : "outline"}
-                                className={`text-xs w-fit ${booking.depositPaid ? "bg-green-100 text-green-800 border-green-200 hover:bg-green-100" : "text-muted-foreground"}`}
-                              >
-                                {booking.depositPaid ? "✓ Deposit Paid" : "Pending"}
-                              </Badge>
-                            </div>
+                            <span className="font-semibold text-sm">{Number(booking.finalPrice).toLocaleString()} EGP</span>
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-col gap-1.5 text-sm">

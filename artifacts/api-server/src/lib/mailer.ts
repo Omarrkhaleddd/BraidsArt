@@ -22,10 +22,13 @@ export interface BookingNotificationData {
   notes?: string | null;
   withExtension?: boolean;
   finalPrice?: number;
-  depositPaid?: boolean;
 }
 
 export async function sendBookingNotification(data: BookingNotificationData): Promise<void> {
+  // ──────────────────────────────────────────────────────────────
+  // ADMIN EMAIL: Set the NOTIFICATION_EMAIL secret in Replit Secrets
+  // (Tools → Secrets → NOTIFICATION_EMAIL = your@email.com)
+  // ──────────────────────────────────────────────────────────────
   const notificationEmail = process.env.NOTIFICATION_EMAIL;
   if (!notificationEmail) {
     logger.warn("NOTIFICATION_EMAIL not set, skipping booking notification");
@@ -33,12 +36,11 @@ export async function sendBookingNotification(data: BookingNotificationData): Pr
   }
 
   const subject = `New Booking: ${data.designName} on ${data.date}`;
-  const depositAmount = data.finalPrice ? (data.finalPrice * 0.2).toFixed(0) : null;
 
   const html = `
     <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; background: #faf7f4; padding: 32px; border-radius: 12px;">
       <h2 style="color: #8B4513; font-size: 24px; margin-bottom: 8px;">New Appointment Booked</h2>
-      <p style="color: #6b5a4e; margin-bottom: 24px;">A new booking has been made at Braids by Design.</p>
+      <p style="color: #6b5a4e; margin-bottom: 24px;">A new booking has been made at BraidsArt.</p>
 
       <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden;">
         <tr style="background: #c17b4a; color: white;">
@@ -60,11 +62,6 @@ export async function sendBookingNotification(data: BookingNotificationData): Pr
         <tr>
           <td style="padding: 12px 16px; color: #8B4513; font-weight: bold; border-bottom: 1px solid #f0e8e0;">Total Price</td>
           <td style="padding: 12px 16px; border-bottom: 1px solid #f0e8e0;"><strong>${data.finalPrice} EGP</strong></td>
-        </tr>` : ""}
-        ${depositAmount ? `
-        <tr>
-          <td style="padding: 12px 16px; color: #8B4513; font-weight: bold; border-bottom: 1px solid #f0e8e0;">Deposit (20%)</td>
-          <td style="padding: 12px 16px; border-bottom: 1px solid #f0e8e0;">${depositAmount} EGP — ${data.depositPaid ? "✅ Paid" : "⏳ Pending"}</td>
         </tr>` : ""}
         <tr style="background: #fffaf7;">
           <td colspan="2" style="padding: 12px 16px; font-weight: bold; font-size: 14px; color: #8B4513; border-bottom: 1px solid #f0e8e0; border-top: 8px solid #f0e8e0;">Customer Info</td>
@@ -90,13 +87,13 @@ export async function sendBookingNotification(data: BookingNotificationData): Pr
         </tr>` : ""}
       </table>
 
-      <p style="margin-top: 24px; color: #9b8b7e; font-size: 13px;">Sent from Braids by Design booking system.</p>
+      <p style="margin-top: 24px; color: #9b8b7e; font-size: 13px;">Sent from BraidsArt booking system.</p>
     </div>
   `;
 
   try {
     await transporter.sendMail({
-      from: `"Braids by Design" <${process.env.SMTP_USER}>`,
+      from: `"BraidsArt" <${process.env.SMTP_USER}>`,
       to: notificationEmail,
       subject,
       html,

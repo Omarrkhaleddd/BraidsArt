@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Sparkles, Calendar, Settings, Home } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 export function Navbar() {
   const [location] = useLocation();
@@ -9,7 +9,7 @@ export function Navbar() {
       <div className="container flex h-16 items-center mx-auto px-4">
         <Link href="/" className="flex items-center gap-2 mr-6">
           <Sparkles className="h-6 w-6 text-primary" />
-          <span className="text-xl font-serif font-semibold text-foreground tracking-tight">Braids by Design</span>
+          <span className="text-xl font-serif font-semibold text-foreground tracking-tight">BraidsArt</span>
         </Link>
         <nav className="flex items-center gap-6 text-sm font-medium ml-auto">
           <Link 
@@ -43,7 +43,7 @@ export function Footer() {
         <div className="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
           <Sparkles className="h-5 w-5 text-primary" />
           <p className="text-sm leading-loose text-muted-foreground">
-            Built for beauty. Celebratory of Black hair culture.
+            © 2025 BraidsArt. All rights reserved.
           </p>
         </div>
       </div>
