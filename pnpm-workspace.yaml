@@ -26,6 +26,7 @@
 #
 # ============================================================================
 minimumReleaseAge: 1440
+ignoredBuilds: []
 
 minimumReleaseAgeExclude:
   # Exclude @replit scoped packages from the minimum release age check.
@@ -72,9 +73,8 @@ onlyBuiltDependencies:
   - esbuild
   - msw
   - unrs-resolver
+  - esbuild@0.27.3
 
-allowedBuildScripts:
-  - esbuild
 
 overrides:
   # replit uses linux-x64 only, we can exclude all other platforms
