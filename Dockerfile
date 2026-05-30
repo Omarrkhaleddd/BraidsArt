@@ -6,6 +6,10 @@ RUN npm install -g pnpm
 
 COPY . .
 
+RUN pnpm install --no-frozen-lockfile --config.confirmModulesPurge=false --ignore-scripts
+
+RUN ./node_modules/.bin/esbuild --version || npx esbuild --version
+
 RUN pnpm install --no-frozen-lockfile --config.confirmModulesPurge=false
 
 RUN pnpm --filter @workspace/api-server run build
