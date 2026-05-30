@@ -1,0 +1,11 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "npm install -g pnpm && pnpm install --no-frozen-lockfile --config.confirmModulesPurge=false && rm -rf artifacts/api-server/dist && pnpm --filter @workspace/api-server run build && pnpm --filter @workspace/braids-booking run build && cp -r artifacts/braids-booking/dist /app-frontend-dist"
+  },
+  "deploy": {
+    "startCommand": "pnpm --filter @workspace/api-server run start",
+    "restartPolicyType": "ON_FAILURE"
+  }
+}
