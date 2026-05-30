@@ -35,7 +35,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api", router);
 
 // Serve React frontend
-const frontendDist = path.join(__dirname, "../../../artifacts/braids-booking/dist");
+const frontendDist = "/app/artifacts/braids-booking/dist";
 app.use(express.static(frontendDist));
 app.get("/{*path}", (_req, res) => {
   res.sendFile(path.join(frontendDist, "index.html"));
