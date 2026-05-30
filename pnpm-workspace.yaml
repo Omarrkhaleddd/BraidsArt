@@ -26,6 +26,7 @@
 #
 # ============================================================================
 minimumReleaseAge: 1440
+allowNonAppliedPatches: true
 ignoredBuilds: []
 
 minimumReleaseAgeExclude:
@@ -73,6 +74,8 @@ onlyBuiltDependencies:
   - esbuild
   - msw
   - unrs-resolver
+
+neverBuiltDependencies: []
 
 
 overrides:
