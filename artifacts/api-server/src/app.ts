@@ -37,7 +37,7 @@ app.use("/api", router);
 // Serve React frontend
 const frontendDist = path.join(__dirname, "../../../braids-booking/dist");
 app.use(express.static(frontendDist));
-app.get("*", (_req, res) => {
+app.get("/{*path}", (_req, res) => {
   res.sendFile(path.join(frontendDist, "index.html"));
 });
 
